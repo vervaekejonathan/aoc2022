@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use itertools::Itertools;
 
 fn main() {
     let (start_position, commands) = include_str!("input.txt").split_once("\n\n").unwrap();
@@ -16,22 +17,18 @@ fn main() {
     }
 
     for line in commands.split("\n") {
-        let line = line.replace("move ", "");
-        let (total, (src, dst)) = line.split_once(" from ")
-                                 .map(|(l,r)| 
-                                        ( l.parse::<usize>().unwrap(), 
-                                          r.split_once(" to ")
-                                           .map(|(l,r)| 
-                                                ( l.parse::<usize>().unwrap() - 1,
-                                                  r.parse::<usize>().unwrap() - 1)
-                                                ).unwrap()
-                                        )
-                                    )
-                                 .unwrap();
+        let (total, src, dst)
+            = line.split(" ")
+                  .skip(1)
+                  .step_by(2)
+                  .map(|x| 
+                        x.parse::<i32>().unwrap())
+                  .collect_tuple()
+                  .unwrap();
 
         for _ in 0..total {
-            let v = stack[src].pop_back().unwrap();
-            stack[dst].push_back(v);
+            let v = stack[(src - 1) as usize].pop_back().unwrap();
+            stack[(dst - 1) as usize].push_back(v);
         }
     }  
 
