@@ -1,8 +1,6 @@
 use std::collections::VecDeque;
 use itertools::Itertools;
 
-const MODDER : i64 = 11 * 2 * 5 * 17 * 19 * 7 * 3 * 13;
-
 #[derive(Debug)]
 struct Monkey<'a> {
     items: VecDeque<i64>,
@@ -39,16 +37,19 @@ fn main() {
         }
     ).collect::<Vec<Monkey>>();
 
-    for _ in 0..10000 {
+    let modder : i64 = monkeys.iter().map(|monkey| monkey.divisible).product();
+
+    for _ in 0..100 {
         for monkey_idx in 0..monkeys.len() {
             while monkeys[monkey_idx].items.len() > 0 {
-                let mut item = monkeys[monkey_idx].items.pop_front().unwrap();
-                item = (monkeys[monkey_idx].operation.parse::<meval::Expr>().unwrap().bind("old").unwrap()(item as f64) as i64) % MODDER;
-                if item % monkeys[monkey_idx].divisible == 0 {
-                    let monkey_send = monkeys[monkey_idx].on_true;
+                let monkey = &mut monkeys[monkey_idx];
+                let mut item = monkey.items.pop_front().unwrap();
+                item = (monkey.operation.parse::<meval::Expr>().unwrap().bind("old").unwrap()(item as f64) as i64) % modder;
+                if item % monkey.divisible == 0 {
+                    let monkey_send = monkey.on_true;
                     monkeys[monkey_send].items.push_back(item);
                 } else {
-                    let monkey_send = monkeys[monkey_idx].on_false;
+                    let monkey_send = monkey.on_false;
                     monkeys[monkey_send].items.push_back(item);
                 }   
                 monkeys[monkey_idx].actions += 1;
